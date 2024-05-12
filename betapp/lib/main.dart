@@ -1,7 +1,10 @@
+import 'package:betapp/Screens/Wrapper.dart';
+import 'package:betapp/Services/authentication.dart';
 import 'package:betapp/firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
-import 'Screens/LoginPage/login_page.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +16,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
-      title: 'Betting App',
-      home: LoginPage(),
+    return StreamProvider<User?>.value(
+      value: Authentication().user,
+      initialData: null,
+      child: const CupertinoApp(
+        title: 'Betting App',
+        home: Wrapper(),
+      ),
     );
   }
 }

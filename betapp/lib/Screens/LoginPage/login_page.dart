@@ -1,14 +1,21 @@
+import 'package:betapp/Services/authentication.dart';
 import 'package:flutter/cupertino.dart';
 
 
+// ignore: must_be_immutable
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  LoginPage({super.key});
+
+  final Authentication _authentication = Authentication();
+  TextEditingController _usernameController = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
-        leading: Text('Login'),
+        middle: Text('Login'),
       ),
       child: Center(
         child: Padding(
@@ -38,6 +45,7 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 20.0,),
               // Eingabefeld für den Benutzernamen
               CupertinoTextField(
+                controller: _usernameController,
                 placeholder: 'Benutzername',
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
@@ -46,11 +54,21 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20.0),
-              // Beispiel für eine Schaltfläche zum Einreichen des Benutzernamens
               CupertinoButton.filled(
                 child: const Text('Registrieren'),
-                onPressed: () {
-                  // Hier kannst du die Logik für das Einreichen des Benutzernamens einfügen
+                onPressed: () async {
+                  if(_usernameController.text.trim().isEmpty){
+                    _showAlertDialog(context, 'Please enter a Username');
+                    return;
+                  }else{
+                    print(_usernameController.text.trim());
+                  }
+                  dynamic user = _authentication.signInAnon();
+                  if(user == null){
+                    _showAlertDialog(context, 'An error happend while trying to sign in.');
+                  }else{
+                    _showAlertDialog(context, 'Success');
+                  }
                 },
               ),
             ],
@@ -59,4 +77,14 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
+
+  void _showAlertDialog(BuildContext context, String message) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Something went wrong'),
+        content: Text(message),
+      ),
+    );
+}
 }
