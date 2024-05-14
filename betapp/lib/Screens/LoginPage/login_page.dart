@@ -63,11 +63,9 @@ class LoginPage extends StatelessWidget {
                   }else{
                     print(_usernameController.text.trim());
                   }
-                  dynamic user = _authentication.signInAnon();
+                  dynamic user = _authentication.signInAnon(_usernameController.text.trim());
                   if(user == null){
                     _showAlertDialog(context, 'An error happend while trying to sign in.');
-                  }else{
-                    _showAlertDialog(context, 'Success');
                   }
                 },
               ),
