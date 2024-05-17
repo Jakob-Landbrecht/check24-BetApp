@@ -13,6 +13,6 @@ class Wrapper extends StatelessWidget {
 
     final user = Provider.of<User?>(context);
 
-    return user != null ? TournamentPage() : LoginPage();
+    return user != null ? const TournamentPage() : LoginPage();
   }
 }
