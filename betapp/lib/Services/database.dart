@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:betapp/Models/tournaments.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -15,7 +13,8 @@ class Database {
       );
       await ref.get().then((querySnapshot) {
         for(var docSnapshot in querySnapshot.docs){
-          print(docSnapshot.data().name);
+          Tournament tournament = docSnapshot.data();
+          tournament.setUID(docSnapshot.id);
           tournaments.add(docSnapshot.data());
         }
       });

@@ -5,11 +5,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Tournament{
   final String? name;
   final String? image_url;
+  String? _uid;
 
   Tournament({
     this.name,
     this.image_url
   });
+
+
+  String getUID(){
+    return _uid ?? "";
+  }
+  
+  void setUID(String uid){
+    _uid = uid;
+  }
 
   String getName(){
     return name ?? "";

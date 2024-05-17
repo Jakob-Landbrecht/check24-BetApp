@@ -1,3 +1,5 @@
+import 'package:betapp/Screens/Dashboard/dashboard.dart';
+import 'package:betapp/Screens/TournamentPage/tournament_page.dart';
 import 'package:betapp/Screens/Wrapper.dart';
 import 'package:betapp/Services/authentication.dart';
 import 'package:betapp/firebase_options.dart';
@@ -19,9 +21,14 @@ class MyApp extends StatelessWidget {
     return StreamProvider<User?>.value(
       value: Authentication().user,
       initialData: null,
-      child: const CupertinoApp(
+      child: CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        routes: {
+          "/tournaments": (context)  => const TournamentPage(),
+          "/dashboard": (context) => const Dashboard(),
+        },
         title: 'Betting App',
-        home: Wrapper(),
+        home: const Wrapper(),
       ),
     );
   }
