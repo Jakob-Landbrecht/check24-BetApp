@@ -1,9 +1,7 @@
 import 'package:betapp/Models/tournaments.dart';
-import 'package:betapp/Screens/Dashboard/dashboard.dart';
 import 'package:betapp/Services/database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class TournamentPage extends StatefulWidget {
   const TournamentPage({super.key});
@@ -13,7 +11,6 @@ class TournamentPage extends StatefulWidget {
 }
 
 class _TournamentPageState extends State<TournamentPage> {
-  final Database dataBase = Database();
   Future<List<Tournament>> tournamentsFuture = Database.getTournaments();
 
   @override

@@ -1,3 +1,4 @@
+import 'package:betapp/Models/game.dart';
 import 'package:betapp/Models/tournaments.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -15,7 +16,7 @@ class Database {
         for(var docSnapshot in querySnapshot.docs){
           Tournament tournament = docSnapshot.data();
           tournament.setUID(docSnapshot.id);
-          tournaments.add(docSnapshot.data());
+          tournaments.add(tournament);
         }
       });
       return tournaments;
@@ -24,4 +25,19 @@ class Database {
       return [];
     }
   }
+
+  static Stream<QuerySnapshot<Game>> upcomingGame(Tournament tournament){
+    return db.collection("Tournaments")
+                     .doc(tournament.getUID())
+                     .collection("Games")
+                     .withConverter(fromFirestore: Game.fromFirestore, toFirestore: (Game game,_ )=> game.toFirestore())
+                     .orderBy("DateUtc")
+                     .limit(1)
+                     .snapshots();
+  }
+
+
+
+
+
 }

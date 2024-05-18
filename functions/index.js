@@ -10,7 +10,7 @@
  */
 
 const {onRequest} = require("firebase-functions/v2/https");
-
+const functions = require("firebase-functions");
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
 const iso6391 = require("iso-639-1");
@@ -421,19 +421,16 @@ exports.importGames = onRequest(async (request, response) => {
 
         // Loop through matches and create documents in Firestore
         for (const match of matches) {
-            const HomeTeamScore = 0;
-            const AwayTeamScore = 0;
             const HomeTeamCode = iso6391.getCode(
-                match.HomeTeam.trim());
+                match.HomeTeam);
             const AwayTeamCode = iso6391.getCode(
-                match.AwayTeam.trim());
+                match.AwayTeam);
 
             match.DateUtc = getFirestoreTimestamp(match.DateUtc);
 
+            functions.logger.log("HomeTeamCode:", HomeTeamCode);
+            functions.logger.log("AwayTeamCode:", AwayTeamCode);
 
-            // Add initial scores to match data
-            match.HomeTeamScore = HomeTeamScore;
-            match.AwayTeamScore = AwayTeamScore;
             match.HomeTeamCode = HomeTeamCode;
             match.AwayTeamCode = AwayTeamCode;
 
