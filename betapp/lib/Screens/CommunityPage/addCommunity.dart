@@ -57,12 +57,95 @@ class _AddCommunityState extends State<AddCommunity> {
           ),
         ),
         SliverToBoxAdapter(
-          child: _selectedSegment == 0 ? CreateCommunity() : Text("2"),
+          child: _selectedSegment == 0 ? const CreateCommunity() : const JoinCommunity(),
         ),
       ],
     ));
   }
 }
+
+
+
+
+class JoinCommunity extends StatefulWidget {
+  const JoinCommunity({super.key});
+
+  @override
+  State<JoinCommunity> createState() => _JoinCommunityState();
+}
+
+class _JoinCommunityState extends State<JoinCommunity> {
+  late TextEditingController _textController;
+  Community community = Community(name: "");
+
+@override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+     final tournament =
+        ModalRoute.of(context)!.settings.arguments as Tournament?;
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CupertinoTextField(
+            maxLength: 40,
+            placeholder: "Enter the community Id",
+            controller: _textController,
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          CupertinoButton.filled(
+              child: const Text("Join Community"),
+              onPressed: () async {
+                if (_textController.text.trim().isEmpty) {
+                  _showAlertDialog(
+                      context, 'Please enter a community ID');
+                  return;
+                }
+                bool communityExists = await  Database.communityExists(_textController.text.trim(), tournament!);
+                if(!communityExists){
+                   _showAlertDialog(
+                      context, 'The Id did not match any community');
+                  return;
+                }
+                await Database.joinCommunity(_textController.text.trim(),tournament);
+                Navigator.pop(context);
+                
+              }),
+        ],
+      ),
+    );
+  }
+
+   void _showAlertDialog(BuildContext context, String message) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext context) => CupertinoAlertDialog(
+        title: const Text('Something went wrong'),
+        content: Text(message),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
 
 class CreateCommunity extends StatefulWidget {
   const CreateCommunity({super.key});

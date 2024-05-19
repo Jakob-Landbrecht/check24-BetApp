@@ -70,6 +70,12 @@ class Database {
     return true;
   }
 
+  static Future<bool> communityExists(String potentialCommunityUid, Tournament tournament)async{
+    final docRef = db.collection("Tournaments").doc(tournament.getUID()).collection("Communities").withConverter(fromFirestore: Community.fromFirestore, toFirestore: (Community community, options) => community.toFirestore()).doc(potentialCommunityUid);
+    DocumentSnapshot documentSnapshot = await docRef.get();
+    return documentSnapshot.exists;
+  }
+
 
 
 
