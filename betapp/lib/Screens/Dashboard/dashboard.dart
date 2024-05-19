@@ -3,7 +3,6 @@ import 'package:betapp/Screens/Dashboard/life.dart';
 import 'package:betapp/Screens/Dashboard/upcoming.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -32,8 +31,13 @@ class _DashboardState extends State<Dashboard> {
             bottom:
                 BorderSide(color: Color.fromARGB(255, 206, 206, 206), width: 2),
           ),
-          trailing: const Icon(CupertinoIcons.group_solid,
-              color: CupertinoColors.systemBlue, size: 24),
+          trailing: CupertinoButton(
+            onPressed: (){
+              print("test");
+              Navigator.pushNamed(context, "/addCommunity", arguments:tournament );},
+            child: const Icon(CupertinoIcons.group_solid,
+                color: CupertinoColors.systemBlue, size: 24),
+          ),
         ),
         SliverList(
           delegate: SliverChildListDelegate.fixed(

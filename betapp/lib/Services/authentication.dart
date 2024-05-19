@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class Authentication{
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore db = FirebaseFirestore.instance;
   
 
@@ -26,6 +26,10 @@ class Authentication{
     } catch (e) {
       return null;
     }
+  }
+
+  static String getUser(){
+    return _auth.currentUser!.uid;
   }
 
   Stream<User?> get user{

@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'package:intl/date_symbol_data_file.dart';
 import 'package:betapp/Models/game.dart';
 import 'package:betapp/Models/tournaments.dart';
+import 'package:betapp/Screens/Bet/bet.dart';
 import 'package:betapp/Services/database.dart';
 import 'package:betapp/Services/storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 
 class UpcomingGame extends StatefulWidget {
   final Tournament tournament;
@@ -42,6 +41,7 @@ class _UpcomingGameState extends State<UpcomingGame> {
             }
             DocumentSnapshot documentSnapshot = snapshot.data!.docs.first;
             Game game = documentSnapshot.data() as Game;
+            game.GameUid = documentSnapshot.id;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -59,7 +59,7 @@ class _UpcomingGameState extends State<UpcomingGame> {
                               builder: (((context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.done) {
-                                  return Image.network(snapshot.data ?? "");
+                                  return Image.network(snapshot.data ?? "", width: 80,);
                                 } else {
                                   return const CupertinoActivityIndicator();
                                 }
@@ -80,7 +80,7 @@ class _UpcomingGameState extends State<UpcomingGame> {
                               builder: (((context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.done) {
-                                  return Image.network(snapshot.data ?? "");
+                                  return Image.network(snapshot.data ?? "", width:80,);
                                 } else {
                                   return const CupertinoActivityIndicator();
                                 }
@@ -98,7 +98,7 @@ class _UpcomingGameState extends State<UpcomingGame> {
                 const SizedBox(height: 10,),
                 CupertinoButton.filled(
                     borderRadius: const BorderRadius.all(Radius.circular(50)),
-                    onPressed: () {},
+                    onPressed: () {showCupertinoModalPopup(context: context, builder: (BuildContext builder)=> BetPopUp(tournament: widget.tournament,game: game,));},
                     child: const Text("Bet now"))
               ],
             );
