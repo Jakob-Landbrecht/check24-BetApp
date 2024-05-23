@@ -1,6 +1,7 @@
 import 'package:betapp/Models/bets.dart';
 import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/game.dart';
+import 'package:betapp/Models/leaderboardEntry.dart';
 import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -78,6 +79,24 @@ class Database {
 
 
 
+
+
+
+
+//////HANDELING THE LEADERBOARD
+///
+///Getting Realtime Feed///
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadCommunityLeaderboard(Community community, Tournament tournament){
+  return db.collection("Tournaments")
+           .doc(tournament.getUID())
+           .collection("Communities")
+           .doc(community.getUid())
+           .collection("Leaderboard")
+           .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+           .orderBy("score")
+           .limit(20)
+           .snapshots();
+}
 
 
 

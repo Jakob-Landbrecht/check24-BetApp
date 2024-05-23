@@ -30,8 +30,7 @@ class _AddCommunityState extends State<AddCommunity> {
             bottom:
                 BorderSide(color: Color.fromARGB(255, 206, 206, 206), width: 2),
           ),
-          trailing: Icon(CupertinoIcons.group_solid,
-              color: CupertinoColors.systemBlue, size: 24),
+  
         ),
         SliverToBoxAdapter(
           child: Padding(

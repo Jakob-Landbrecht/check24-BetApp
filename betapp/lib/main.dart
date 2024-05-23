@@ -1,3 +1,4 @@
+import 'package:betapp/Screens/CommunityDahboard/communityPage.dart';
 import 'package:betapp/Screens/CommunityPage/addCommunity.dart';
 import 'package:betapp/Screens/Dashboard/dashboard.dart';
 import 'package:betapp/Screens/TournamentPage/tournament_page.dart';
@@ -28,6 +29,8 @@ class MyApp extends StatelessWidget {
           "/tournaments": (context)  => const TournamentPage(),
           "/dashboard": (context) => const Dashboard(),
           "/addCommunity": (context) => const AddCommunity(),
+          "/communityPage": (context) => const CommunityPage(),
+
         },
         title: 'Betting App',
         home: const Wrapper(),
