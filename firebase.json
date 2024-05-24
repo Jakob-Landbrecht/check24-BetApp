@@ -18,6 +18,15 @@
     }
   ],
   "emulators": {
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "functions": {
+      "port": 6105
+    },
+    "firestore": {
+      "port": 8085
+    },
+    "ui": {
+      "enabled": true
+    }
   }
 }

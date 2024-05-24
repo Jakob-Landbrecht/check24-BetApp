@@ -1,6 +1,8 @@
+import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Screens/Dashboard/life.dart';
 import 'package:betapp/Screens/Dashboard/upcoming.dart';
+import 'package:betapp/Services/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -48,8 +50,9 @@ class _DashboardState extends State<Dashboard> {
                 const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0), child: LifeGame(),)
             ]),
         ),
-        SliverToBoxAdapter(child: CupertinoButton(child: const Text("CommunityTest"), onPressed: (){Navigator.pushNamed(context, "/communityPage");})),
-        const SliverFillRemaining()
+        SliverToBoxAdapter(child: CupertinoButton(child: const Text("CommunityTest"), onPressed: (){Navigator.pushNamed(context, "/communityPage", arguments: {"tournament": tournament,"community": Community(name: "Jakob's Freunde",communityUid: "G0G829AxzCwFmWftGEhw")});})),
+        const SliverFillRemaining(),
+        SliverToBoxAdapter(child: CupertinoButton(child:Text("Sign out"), onPressed: () => Authentication.signOut(),))
       ],
     ));
   }

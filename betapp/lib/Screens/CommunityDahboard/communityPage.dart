@@ -1,5 +1,9 @@
+import 'package:betapp/Models/community.dart';
+import 'package:betapp/Models/leaderboardEntry.dart';
+import 'package:betapp/Models/tournaments.dart';
+import 'package:betapp/Services/database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 class CommunityPage extends StatefulWidget {
@@ -14,14 +18,19 @@ class _CommunityPageState extends State<CommunityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final arguments = (ModalRoute.of(context)?.settings.arguments ??
+        <String, dynamic>{}) as Map;
+    final Tournament tournament = arguments["tournament"];
+    final Community community = arguments["community"];
+
     return CupertinoPageScaffold(
         backgroundColor: CupertinoColors.extraLightBackgroundGray,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            const CupertinoSliverNavigationBar(
+            CupertinoSliverNavigationBar(
               backgroundColor: CupertinoColors.extraLightBackgroundGray,
-              largeTitle: Text("Community Name"),
+              largeTitle: Text(community.name),
               stretch: true,
               border: Border(),
               automaticallyImplyLeading: true,
@@ -65,7 +74,7 @@ class _CommunityPageState extends State<CommunityPage> {
                                 icon: CupertinoIcons.pin,
                                 onTap: () {},
                               ),
-                               PullDownMenuItem(
+                              PullDownMenuItem(
                                 title: "My Position",
                                 icon: CupertinoIcons.location,
                                 onTap: () {},
@@ -89,7 +98,11 @@ class _CommunityPageState extends State<CommunityPage> {
                   ),
                   onPressed: () {}),
             ),
-            const SliverToBoxAdapter(child: PaginatedListView()),
+            SliverToBoxAdapter(
+                child: PaginatedListView(
+              tournament: tournament,
+              community: community,
+            )),
             SliverToBoxAdapter(
               child: CupertinoButton(
                   child: const Icon(
@@ -104,7 +117,11 @@ class _CommunityPageState extends State<CommunityPage> {
 }
 
 class PaginatedListView extends StatefulWidget {
-  const PaginatedListView({super.key});
+  final Tournament tournament;
+  final Community community;
+
+  const PaginatedListView(
+      {super.key, required this.tournament, required this.community});
 
   @override
   State<PaginatedListView> createState() => _PaginatedListViewState();
@@ -113,29 +130,51 @@ class PaginatedListView extends StatefulWidget {
 class _PaginatedListViewState extends State<PaginatedListView> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.zero,
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: const [
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-        const ListTile(),
-      ],
-    );
+    final Stream<QuerySnapshot> leaderboardStream =
+        Database.loadCommunityLeaderboard(widget.community, widget.tournament);
+
+    return StreamBuilder<QuerySnapshot>(
+        stream: leaderboardStream,
+        builder:
+            ((BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CupertinoActivityIndicator(
+                radius: 20.0,
+              ),
+            );
+          }
+          return ListView(
+            padding: EdgeInsets.zero,
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: snapshot.data!.docs
+                .map((DocumentSnapshot document) {
+                  LeaderBoardEntry leaderBoardEntry =
+                      document.data()! as LeaderBoardEntry;
+                  return ListTile(
+                    score: leaderBoardEntry.score,
+                    rang: leaderBoardEntry.rang,
+                    username: leaderBoardEntry.username,
+                  );
+                })
+                .toList()
+                .cast(),
+          );
+        }));
   }
 }
 
 class ListTile extends StatelessWidget {
-  const ListTile({super.key});
+  final int score;
+  final int rang;
+  final String username;
+  const ListTile(
+      {super.key,
+      required this.score,
+      required this.rang,
+      required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -144,23 +183,16 @@ class ListTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       child: Row(
         children: [
-          Text("1.",
+          Text("$rang.",
               style: CupertinoTheme.of(context).textTheme.navTitleTextStyle),
           Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 5, 0),
-              child: Text("JayJay3006",
+              child: Text(username,
                   style:
                       CupertinoTheme.of(context).textTheme.navTitleTextStyle)),
-          Container(
-            width: 10.0,
-            height: 10.0, // Height of the circle
-            decoration: const BoxDecoration(
-              color: CupertinoColors.activeGreen, // Circle color
-              shape: BoxShape.circle, // Shape of the container
-            ),
-          ),
+          
           const Spacer(),
-          const Text("12"),
+          Text("$score"),
           CupertinoButton(
               child: const Icon(
                 CupertinoIcons.pin,

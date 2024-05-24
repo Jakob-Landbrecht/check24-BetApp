@@ -1,44 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class LeaderBoardEntry{
+class LeaderBoardEntry {
   final int rang;
   final int score;
-  final String userID;
-  String? Id;
+  final int scoreTemp;
+  final String userId;
+  final String username;
+  String? id;
 
   LeaderBoardEntry({
     required this.rang,
     required this.score,
-    required this.userID,
+    required this.scoreTemp,
+    required this.userId,
+    required this.username
   });
 
-void setUid(String uid){
-  Id = uid;
-}
+  void setUid(String uid) {
+    id = uid;
+  }
 
-String getUid(){
-  return Id!;
-}
+  String getUid() {
+    return id!;
+  }
+
 
   factory LeaderBoardEntry.fromFirestore(
-    DocumentSnapshot<Map<String,dynamic>> snapshot,
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
-  ){
+  ) {
     final data = snapshot.data();
     return LeaderBoardEntry(
       rang: data?["rang"],
       score: data?["score"],
-      userID: data?["userID"],
-       );
+      username: data?["username"],
+      userId: data?["userId"],
+      scoreTemp: data?["scoreTemp"]
+    );
   }
 
-
-  Map<String, dynamic> toFirestore(){
-    return{
+  Map<String, dynamic> toFirestore() {
+    return {
       "rang": rang,
       "score": score,
-      "userID": userID,
+      "username": username,
+      "userId": userId,
+      "scoreTemp": scoreTemp
     };
   }
-
 }

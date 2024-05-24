@@ -3,6 +3,7 @@ import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/game.dart';
 import 'package:betapp/Models/leaderboardEntry.dart';
 import 'package:betapp/Models/tournaments.dart';
+import 'package:betapp/Models/user.dart';
 import 'package:betapp/Services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -36,8 +37,18 @@ class Database {
                      .collection("Games")
                      .withConverter(fromFirestore: Game.fromFirestore, toFirestore: (Game game,_ )=> game.toFirestore())
                      .orderBy("DateUtc")
+                     .where("DateUtc", isGreaterThan: DateTime.now()) //.add(const Duration(days:30))
                      .limit(1)
                      .snapshots();
+  }
+
+  static Stream<QuerySnapshot<Game>> currentGame(Tournament tournament){
+    return db.collection("Tournament")
+                     .doc(tournament.getUID())
+                     .collection("Games")
+                    .withConverter(fromFirestore: Game.fromFirestore, toFirestore: (Game game,_ )=> game.toFirestore())
+                    .where("DateUtc", isGreaterThan: DateTime.now(), isLessThan: DateTime.now().add(const Duration(minutes: 90)))
+                    .snapshots();
   }
 
   static Future<bool> setBet(Tournament tournament, Game game, int homeTeamCount, int awayTeamCount)async{
@@ -61,7 +72,13 @@ class Database {
 
   static Future<bool> joinCommunity(String communityUid, Tournament tournament) async {
     final docRef = db.collection("User").doc(Authentication.getUser());
+    DocumentSnapshot<User> temp = await docRef.withConverter(fromFirestore: User.fromFirestore, toFirestore: (User user, options) => user.toFirestore()).get();
+    User user = temp.data()!;
     await docRef.update({"Communities:${tournament.getUID()}" : FieldValue.arrayUnion([communityUid])});
+
+    final leaderBoardRef = db.collection("Tournaments").doc(tournament.getUID()).collection("Communities").doc(communityUid).collection("Leaderboard")
+    .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options)=> leaderboardEntry.toFirestore()).doc();
+    await leaderBoardRef.set(LeaderBoardEntry(rang: 0, score: 0, scoreTemp: 0, userId: Authentication.getUser(), username: user.username));    
     return true;
   }
 
@@ -93,7 +110,7 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadCommunityLeaderboard(Communit
            .doc(community.getUid())
            .collection("Leaderboard")
            .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
-           .orderBy("score")
+           .orderBy("rang")
            .limit(20)
            .snapshots();
 }

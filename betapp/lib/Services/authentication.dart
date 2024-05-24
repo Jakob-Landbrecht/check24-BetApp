@@ -36,7 +36,7 @@ class Authentication{
     return _auth.authStateChanges();
   }
 
-  void signOut() async{
+  static void signOut() async{
     _auth.signOut();
   }
 
