@@ -13,6 +13,7 @@
 
 const {onRequest} = require("firebase-functions/v2/https");
 const {functions} = require("firebase-functions/v2");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
 const iso6391 = require("iso-639-1");
@@ -26,6 +27,7 @@ const {onDocumentCreated,
 
 // The Firebase Admin SDK to access Firestore.
 admin.initializeApp();
+
 
 exports.importGames = onRequest(async (request, response) => {
     try {
@@ -557,3 +559,41 @@ function getFirestoreTimestamp(dateString) {
     const date = new Date(dateString);
     return admin.firestore.Timestamp.fromDate(date);
 }
+
+exports.cleanScores = onSchedule("every 6 hours", async (event) => {
+        try {
+            const tournamentsSnapshot = await admin.firestore().collection("Tournaments").get();
+
+            const updatePromises = [];
+
+            tournamentsSnapshot.forEach(async (tournamentDoc) => {
+                const tournamentId = tournamentDoc.id;
+                const communitiesSnapshot = await admin.firestore().collection("Tournaments").doc(tournamentId).collection("Communities").get();
+
+                communitiesSnapshot.forEach(async (communityDoc) => {
+                    const communityId = communityDoc.id;
+                    const leaderboardRef = admin.firestore().collection("Tournaments").doc(tournamentId).collection("Communities").doc(communityId).collection("Leaderboard");
+                    const leaderboardSnapshot = await leaderboardRef.get();
+
+                    leaderboardSnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const updatedScore = data.score + data.scoreTemp;
+
+                        updatePromises.push(doc.ref.update({
+                            score: updatedScore,
+                            scoreTemp: 0,
+                        }));
+                    });
+                });
+            });
+
+            // Wait for all updates to complete before finishing
+            await Promise.all(updatePromises);
+
+            console.log("Leaderboard scores updated successfully");
+            return null;
+        } catch (error) {
+            console.error("Error in updateLeaderboardScores function:", error);
+            throw new Error("Failed to update leaderboard scores");
+        }
+    });
