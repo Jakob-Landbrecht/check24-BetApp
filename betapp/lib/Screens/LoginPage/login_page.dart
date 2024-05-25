@@ -38,7 +38,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
               const Text(
-                  "Willkommen in der Check24 Betting App von Jakob Landbrecht für das GenDev Stipendium",
+                  "Welcome to the Check24 Betting App by Jakob Landbrecht for the GenDev Scholarship",
                   style: TextStyle(
                     color: Color.fromARGB(255, 45, 45, 45),
                   )),
@@ -46,7 +46,7 @@ class LoginPage extends StatelessWidget {
               // Eingabefeld für den Benutzernamen
               CupertinoTextField(
                 controller: _usernameController,
-                placeholder: 'Benutzername',
+                placeholder: 'Username',
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
                   color: CupertinoColors.lightBackgroundGray,
@@ -55,7 +55,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
               CupertinoButton.filled(
-                child: const Text('Registrieren'),
+                child: const Text('register'),
                 onPressed: () async {
                   if(_usernameController.text.trim().isEmpty){
                     _showAlertDialog(context, 'Please enter a Username');

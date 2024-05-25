@@ -5,7 +5,6 @@ import 'package:betapp/Screens/Dashboard/upcoming.dart';
 import 'package:betapp/Services/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -47,12 +46,14 @@ class _DashboardState extends State<Dashboard> {
               [ const Padding(padding: EdgeInsets.fromLTRB(20,10,20,10), child: Text("Upcoming game", style: TextStyle(fontWeight: FontWeight.w300),),),
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: UpcomingGame(tournament: tournament ?? Tournament(),)),
                 const Padding(padding: EdgeInsets.fromLTRB(20,20,20,10), child: Text("Currently life", style: TextStyle(fontWeight: FontWeight.w300),),),
-                const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0), child: LifeGame(),)
+                Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0), child: LifeGame(tournament: tournament ?? Tournament(),),),
+                const Padding(padding: EdgeInsets.fromLTRB(20,20,20,10), child: Text("Community previews", style: TextStyle(fontWeight: FontWeight.w300),),),
+
             ]),
         ),
         SliverToBoxAdapter(child: CupertinoButton(child: const Text("CommunityTest"), onPressed: (){Navigator.pushNamed(context, "/communityPage", arguments: {"tournament": tournament,"community": Community(name: "Test-5",communityUid: "G0G829AxzCwFmWftGEhw")});})),
         const SliverFillRemaining(),
-        SliverToBoxAdapter(child: CupertinoButton(child:Text("Sign out"), onPressed: () => Authentication.signOut(),))
+        SliverToBoxAdapter(child: CupertinoButton(child: const Text("Sign out"), onPressed: () => Authentication.signOut(),))
       ],
     ));
   }

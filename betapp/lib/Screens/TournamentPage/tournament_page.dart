@@ -21,7 +21,7 @@ class _TournamentPageState extends State<TournamentPage> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-        child: CustomScrollView(
+        child: CustomScrollView( 
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
             const CupertinoSliverNavigationBar(
@@ -62,6 +62,7 @@ class TournamentList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      padding: const EdgeInsets.all(0),
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       itemCount: tournaments.length,
