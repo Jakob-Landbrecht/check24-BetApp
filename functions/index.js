@@ -597,3 +597,48 @@ exports.cleanScores = onSchedule("every 6 hours", async (event) => {
             throw new Error("Failed to update leaderboard scores");
         }
     });
+
+exports.updateValue = onRequest(async (req, res) => {
+  try {
+    // Extract the 'score' and 'isHomeTeam' parameters from the URL
+    const score = req.query.score;
+    const isHomeTeamParam = req.query.isHomeTeam;
+    const tournamentId = req.query.tournamentId;
+
+    if (!score || isHomeTeamParam || tournamentId === undefined) {
+      res.status(400).send("Missing 'number', 'isHomeTeam', 'tournamentId' parameter");
+      return;
+    }
+
+    const numberValue = parseInt(score, 10);
+    const isHomeTeamValue = isHomeTeamParam === "true";
+
+    if (isNaN(numberValue)) {
+      res.status(400).send("'number' parameter should be a valid number");
+      return;
+    }
+
+    // get upcoming Game
+    const upcomingRef = admin.firestore().collection("Tournaments").doc(tournamentId).collection("Games").orderBy("DateUtc").limit(1);
+    const gameSnapshot = await upcomingRef.get();
+
+    gameSnapshot.forEach(async (doc) => {
+            // Update Firestore document (example: updating a document in 'collectionName' with ID 'documentId')
+    const docRef = admin.firestore().collection("Tournaments").doc(tournamentId).collection("Games").doc(doc.id);
+    if (isHomeTeamValue) {
+        await docRef.update({
+            HomeTeamScore: numberValue,
+          });
+    } else {
+        await docRef.update({
+            AwayTeamScore: numberValue,
+          });
+    }
+    });
+
+    res.status(200).send(`Value updated to ${numberValue} and isHomeTeam set to ${isHomeTeamValue}`);
+  } catch (error) {
+    console.error("Error updating Firestore document:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});

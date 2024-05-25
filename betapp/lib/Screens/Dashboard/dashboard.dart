@@ -35,7 +35,6 @@ class _DashboardState extends State<Dashboard> {
           ),
           trailing: CupertinoButton(
             onPressed: (){
-              print("test");
               Navigator.pushNamed(context, "/addCommunity", arguments:tournament );},
             child: const Icon(CupertinoIcons.group_solid,
                 color: CupertinoColors.systemBlue, size: 24),

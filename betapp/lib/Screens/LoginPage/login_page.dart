@@ -60,8 +60,6 @@ class LoginPage extends StatelessWidget {
                   if(_usernameController.text.trim().isEmpty){
                     _showAlertDialog(context, 'Please enter a Username');
                     return;
-                  }else{
-                    print(_usernameController.text.trim());
                   }
                   dynamic user = _authentication.signInAnon(_usernameController.text.trim());
                   if(user == null){

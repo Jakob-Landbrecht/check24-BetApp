@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/leaderboardEntry.dart';
 import 'package:betapp/Models/tournaments.dart';
@@ -37,7 +35,7 @@ class _CommunityPageState extends State<CommunityPage> {
               backgroundColor: CupertinoColors.extraLightBackgroundGray,
               largeTitle: Text(community.name),
               stretch: true,
-              border: Border(),
+              border: const Border(),
               automaticallyImplyLeading: true,
             ),
             SliverToBoxAdapter(
@@ -110,7 +108,7 @@ class _CommunityPageState extends State<CommunityPage> {
                               ),
                             ],
                             position: Rect.fromCenter(
-                                center: Offset(300, 100),
+                                center: const Offset(300, 100),
                                 width: 200,
                                 height: 200),
                           );

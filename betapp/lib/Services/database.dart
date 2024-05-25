@@ -26,7 +26,6 @@ class Database {
       });
       return tournaments;
     } catch (e) {
-      print("Error fetching tournaments: $e");
       return [];
     }
   }
