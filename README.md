@@ -24,7 +24,7 @@ What is the best way to have 10.000 open Websocket connections? I spend hours re
 Firestore is a product by Google as part of the Firebase offering. It offers specific SDK's for the predominant platforms that solve issues like offline data handling and makes querying data easy. Moreover it automatically scales so-called "subsciption Handler" services that notify the frontend of database changes (think of a scored goal). This way up to 1 million connections connections can be established. This makes near realtime Access to the leaderboard possible and is perfect for this application. One drawback I noticed are the limited options when building complex queries in contrast to SQL. Sadly queries kann only spann ower one collection (like a folder) which makes compounded requests very complicated and slow.
 ![changelog_architecture](https://github.com/Jakob-Landbrecht/check24-BetApp/assets/44413507/bd116719-d5b1-4310-83ab-489f64706b82)
 ### Frontend
-The frontend is written in Flutter (or Dart to be precise). This cross-platform framework can be used to write Ios, Android and web applications from one code base. As this App is not tend to be completly production ready there are numerous aspects of my app, that still could be improved. First of all, there is currently no multi language support and some aspects of error handeling are not implemented. The app is structured in models (defining the data structure), screens (views), and services. **If you want check out and play around with the web version of my application on:** [bet.jakob-landbrecht.com](bet.jakob-landbrecht.com)
+The frontend is written in Flutter (or Dart to be precise). This cross-platform framework can be used to write Ios, Android and web applications from one code base. As this App is not tend to be completly production ready there are numerous aspects of my app, that still could be improved. First of all, there is currently no multi language support and some aspects of error handeling are not implemented. The app is structured in models (defining the data structure), screens (views), and services. **If you want check out and play around with the web version of my application on:** [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
 ## Features and Fullfilled Requirements
 1. Authentication: Firebase Authentication is used to authenticate the user. This way other authentication providers such as Google, Apple or Facebook could be easily added.
 2. Communities: The app can handle multiple tournaments simultaniously and the app can switch between the different tournaments. Every user can create (or join) tournaments and send an invitation code to his friends.
@@ -37,7 +37,7 @@ The frontend is written in Flutter (or Dart to be precise). This cross-platform 
 There are two important folders. The first one is [functions](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/functions) that stores all serverless functions deployed to Google. The second one is [lib](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/betapp/lib) which holds all frontend related files.
 ## Demonstration
 1. Take a look at this guided demonstration, presenting the Ios version: [Youtube](amazon.de)  
-2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](bet.jakob-landbrecht.com)
+2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
 You can adjust the score of the upcoming game by invoking this url:
 ```
 https://helloworld-csjycr6t2q-uc.a.run.app
