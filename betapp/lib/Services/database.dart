@@ -172,7 +172,7 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadPinned(Community community, T
       .snapshots();
 }
 
- 
+ //show current posf
 static Stream<QuerySnapshot<LeaderBoardEntry>> loadmyCurrentPos(Community community, Tournament tournament) async*{
   final docRef =  db
       .collection("Tournaments")
@@ -197,4 +197,6 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadmyCurrentPos(Community commun
            .limit(3)
            .snapshots();
 }
+
+//static Stream<QuerySnapshot<LeaderBoardEntry>> nextEntries(){}
 }
