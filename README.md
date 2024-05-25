@@ -43,9 +43,10 @@ There are two important folders. The first one is [functions](https://github.com
 ## Demonstration
 1. Take a look at this guided demonstration, presenting the iOS version: [Youtube](amazon.de)  
 2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
+   
 You can adjust the score of the upcoming game by invoking this URL:
 ```
-https://helloworld-csjycr6t2q-uc.a.run.app
+https://updatevalue-csjycr6t2q-uc.a.run.app/?score={ScoreInteger}&isHomeTeam={true/false}&tournamentId=zXbeHbpMG4a5DPb8jgwT
 ```
 ## Conclusion
 I invested a long time in this project and in retrospect, there are multiple issues I would like to improve on. Firstly, the overall structure of the code. I did not stick to the correct variable notation recommended by Dart and opted for Camelcase. This also results in an inconsistent naming convention for the names of some entries in the database. Secondly, decoupling. Even though my project is fairly well structured, I would now create a unique cloud Function for every single database request (except the ones requiring real-time updates). This would make it easier to replace the Database and to handle incorrect requests.  
