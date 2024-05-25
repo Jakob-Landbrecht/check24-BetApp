@@ -41,7 +41,7 @@ Login/Tournament           |  Placing a Bet            |  Add/Join Community    
 ## Understanding the code
 There are two important folders. The first one is [functions](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/functions) which stores all serverless functions deployed to Google. The second one is [lib](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/betapp/lib) which holds all frontend-related files.
 ## Demonstration
-1. Take a look at this guided demonstration, presenting the Ios version: [Youtube](amazon.de)  
+1. Take a look at this guided demonstration, presenting the iOS version: [Youtube](amazon.de)  
 2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
 You can adjust the score of the upcoming game by invoking this URL:
 ```
