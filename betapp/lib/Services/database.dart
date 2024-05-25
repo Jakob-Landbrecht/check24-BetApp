@@ -6,6 +6,7 @@ import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Models/user.dart';
 import 'package:betapp/Services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Database {
   static final db = FirebaseFirestore.instance;
@@ -115,6 +116,85 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadCommunityLeaderboard(Communit
            .snapshots();
 }
 
+///show only top 3
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadTop3(Community community, Tournament tournament){
+  return db.collection("Tournaments")
+           .doc(tournament.getUID())
+           .collection("Communities")
+           .doc(community.getUid())
+           .collection("Leaderboard")
+           .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+           .orderBy("rang")
+           .limit(3)
+           .snapshots();
+}
+//show last
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadLastplace(Community community, Tournament tournament){
+  return db.collection("Tournaments")
+           .doc(tournament.getUID())
+           .collection("Communities")
+           .doc(community.getUid())
+           .collection("Leaderboard")
+           .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+           .orderBy("rang", descending: true)
+           .limit(1)
+           .snapshots();
+}
+//search 
+static Stream<QuerySnapshot<LeaderBoardEntry>> searchPlayer(Community community, Tournament tournament, String Name){
+  return db.collection("Tournaments")
+           .doc(tournament.getUID())
+           .collection("Communities")
+           .doc(community.getUid())
+           .collection("Leaderboard")
+           .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+           .where("username",isEqualTo: Name)
+           .limit(1)
+           .snapshots();
+}
 
+//show pinned only
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadPinned(Community community, Tournament tournament) async* {
+  // Obtain shared preferences.
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  // Retrieve the pinned users list.
+  List<String> pinnedUsers = prefs.getStringList('pinned') ?? [];
 
+  // Return the Firestore query stream.
+  yield* db
+      .collection("Tournaments")
+      .doc(tournament.getUID())
+      .collection("Communities")
+      .doc(community.getUid())
+      .collection("Leaderboard")
+      .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+      .where("userId", whereIn: pinnedUsers.isEmpty ? null : pinnedUsers)
+      .snapshots();
+}
+
+ 
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadmyCurrentPos(Community community, Tournament tournament) async*{
+  final docRef =  db
+      .collection("Tournaments")
+      .doc(tournament.getUID())
+      .collection("Communities")
+      .doc(community.getUid())
+      .collection("Leaderboard")
+      .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+      .where("userId", isEqualTo: Authentication.getUser());
+  
+  QuerySnapshot<LeaderBoardEntry> doc = await docRef.get();
+  DocumentSnapshot<LeaderBoardEntry> snapshot = doc.docs.first;
+
+  yield* db.collection("Tournaments")
+           .doc(tournament.getUID())
+           .collection("Communities")
+           .doc(community.getUid())
+           .collection("Leaderboard")
+           .withConverter(fromFirestore: LeaderBoardEntry.fromFirestore, toFirestore: (LeaderBoardEntry leaderboardEntry, options) => leaderboardEntry.toFirestore())
+           .orderBy("rang")
+           .startAtDocument(snapshot)
+           .limit(3)
+           .snapshots();
+}
 }

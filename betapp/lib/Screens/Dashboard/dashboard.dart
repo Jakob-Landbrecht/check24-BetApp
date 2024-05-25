@@ -50,7 +50,7 @@ class _DashboardState extends State<Dashboard> {
                 const Padding(padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0), child: LifeGame(),)
             ]),
         ),
-        SliverToBoxAdapter(child: CupertinoButton(child: const Text("CommunityTest"), onPressed: (){Navigator.pushNamed(context, "/communityPage", arguments: {"tournament": tournament,"community": Community(name: "Jakob's Freunde",communityUid: "G0G829AxzCwFmWftGEhw")});})),
+        SliverToBoxAdapter(child: CupertinoButton(child: const Text("CommunityTest"), onPressed: (){Navigator.pushNamed(context, "/communityPage", arguments: {"tournament": tournament,"community": Community(name: "Test-5",communityUid: "G0G829AxzCwFmWftGEhw")});})),
         const SliverFillRemaining(),
         SliverToBoxAdapter(child: CupertinoButton(child:Text("Sign out"), onPressed: () => Authentication.signOut(),))
       ],
