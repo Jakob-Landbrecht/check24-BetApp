@@ -644,7 +644,7 @@ exports.updateValue = onRequest(async (req, res) => {
 });
 
 
-exports.getLeaderboardPreview = onRequest({region: "europe-west3"}, async (req, res) => {
+exports.getLeaderboardPreview = onRequest({region: "europe-west3", cors: false}, async (req, res) => {
     // Ensure the request is a POST request
     if (req.method !== "POST") {
         res.status(405).send("Method Not Allowed");

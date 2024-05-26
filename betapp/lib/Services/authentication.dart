@@ -3,7 +3,7 @@ import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/rendering.dart';
+
 
 class Authentication{
 
@@ -26,7 +26,9 @@ class Authentication{
 
       QuerySnapshot<Tournament> snapshot = await db.collection("Tournaments").withConverter(fromFirestore: Tournament.fromFirestore, toFirestore: (Tournament tournament, options) => tournament.toFirestore()).get();
       for(DocumentSnapshot<Tournament> document in snapshot.docs){
-        await Database.joinCommunity("global", document.data()!);
+        Tournament tournament = document.data()!;
+        tournament.setUID(document.id);
+        await Database.joinCommunity("global", tournament);
       }
       return user;
     } catch (e) {

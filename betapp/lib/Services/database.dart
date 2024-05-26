@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:betapp/Models/preview.dart';
 import 'package:http/http.dart' as http;
 import 'package:betapp/Models/bets.dart';
 import 'package:betapp/Models/community.dart';
@@ -141,8 +142,9 @@ class Database {
     return true;
   }
 
-  static Future<int> getInitialRang(CollectionReference leaderBoardRef)async{
-    AggregateQuerySnapshot aggregateQuerySnapshot = await leaderBoardRef.count().get();
+  static Future<int> getInitialRang(CollectionReference leaderBoardRef) async {
+    AggregateQuerySnapshot aggregateQuerySnapshot =
+        await leaderBoardRef.count().get();
     return aggregateQuerySnapshot.count ?? 1;
   }
 
@@ -309,39 +311,79 @@ class Database {
         .update({"isOnline": isOnline});
   }
 
-  static Future<List<LeaderBoardEntry>> getPreviewLeaderboard(
-      String communityId, String tournamentId) async {
+  static Future<List<Preview>> getPreviewLeaderboard(
+      String tournamentId) async {
     const String apiUrl =
         "https://getleaderboardpreview-csjycr6t2q-ey.a.run.app";
-    // Define the request body
-    Map<String, dynamic> requestBody = {
-      "communityId": communityId,
-      "loggedInUserId": Authentication.getUser(),
-      "tournamentId": tournamentId,
-    };
-    // Make the HTTP POST request
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      body: jsonEncode(requestBody),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
-    // Check if the request was successful
-    if (response.statusCode == 200) {
-      // Parse the response body
-      List<dynamic> data = jsonDecode(response.body);
 
-      // Convert the response data to the desired format (List<Map<String, dynamic>>)
-      List<LeaderBoardEntry> leaderboardEntries = [];
-      data.forEach((entry) {
-        leaderboardEntries.add(LeaderBoardEntry(rang: entry["rang"], score: entry["score"], scoreTemp: entry["scoreTemp"], userId: entry["userId"], username: entry["username"], registrationDate: entry["registrationDate"]));
-      });
+    //get All Communities of loged In user
+    final doc = await db.collection("User").doc(Authentication.getUser()).get();
+    Map<String, dynamic>? data = doc.data();
 
-      return leaderboardEntries;
-    } else {
-      // If the request was not successful, throw an exception or handle the error accordingly
-      throw Exception('Failed to load leaderboard preview');
+
+    var communities = data!["Communities:$tournamentId"];
+    List<Preview> result = [];
+
+    for (String communityId in communities) {
+      //get community Name
+      DocumentSnapshot communityReference = await db
+          .collection("Tournaments")
+          .doc(tournamentId)
+          .collection("Communities")
+          .doc(communityId)
+          .withConverter(
+              fromFirestore: Community.fromFirestore,
+              toFirestore: (Community community, options) =>
+                  community.toFirestore())
+          .get();
+        Community community = communityReference.data() as Community;
+        community.setUid(communityReference.id);
+
+      // Define the request body
+      Map<String, dynamic> requestBody = {
+        "communityId": communityId,
+        "loggedInUserId": Authentication.getUser(),
+        "tournamentId": tournamentId,
+      };
+      // Make the HTTP POST request
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: jsonEncode(requestBody),
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      );
+
+      // Check if the request was successful
+      if (response.statusCode == 200) {
+        // Parse the response body
+        List<dynamic> data = jsonDecode(response.body);
+        List<LeaderBoardEntry> leaderboardEntries = [];
+        try {
+          // Convert the response data to the desired format (List<Map<String, dynamic>>)
+
+          data.forEach((entry) {
+            leaderboardEntries.add(LeaderBoardEntry(
+                rang: entry["rang"],
+                score: entry["score"],
+                scoreTemp: entry["scoreTemp"],
+                userId: entry["userId"],
+                username: entry["username"],
+                registrationDate: Timestamp(entry["registrationDate"]["_seconds"],entry["registrationDate"]["_nanoseconds"])));
+          });
+        } catch (e) {
+          print(e.toString());
+        }
+
+        result.add(Preview(
+            leaderboard: leaderboardEntries,
+            community: community));
+      } else {
+        // If the request was not successful, throw an exception or handle the error accordingly
+        throw Exception('Failed to load leaderboard preview');
+      }
     }
+
+    return result;
   }
 }

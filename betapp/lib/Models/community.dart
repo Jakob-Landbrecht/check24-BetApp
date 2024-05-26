@@ -13,6 +13,10 @@ class Community{
     return communityUid!;
   }
 
+  setUid(String uid){
+    communityUid = uid;
+  }
+
   factory Community.fromFirestore(
     DocumentSnapshot<Map<String,dynamic>> snapshot,
     SnapshotOptions? options,
