@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:betapp/Models/bets.dart';
 import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/game.dart';
@@ -53,7 +55,7 @@ class Database {
         .withConverter(
             fromFirestore: Game.fromFirestore,
             toFirestore: (Game game, _) => game.toFirestore())
-            .orderBy("DateUtc")
+        .orderBy("DateUtc")
         .where("DateUtc",
             isLessThan: DateTime.now(),
             isGreaterThan: DateTime.now().subtract(const Duration(minutes: 90)))
@@ -127,15 +129,21 @@ class Database {
         .withConverter(
             fromFirestore: LeaderBoardEntry.fromFirestore,
             toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
-                leaderboardEntry.toFirestore())
-        .doc();
-    await leaderBoardRef.set(LeaderBoardEntry(
-        rang: 0,
+                leaderboardEntry.toFirestore());
+
+    await leaderBoardRef.doc().set(LeaderBoardEntry(
+        rang: await getInitialRang(leaderBoardRef) + 1,
         score: 0,
         scoreTemp: 0,
         userId: Authentication.getUser(),
+        registrationDate: await Authentication.getRegistrationDate(),
         username: user.username));
     return true;
+  }
+
+  static Future<int> getInitialRang(CollectionReference leaderBoardRef)async{
+    AggregateQuerySnapshot aggregateQuerySnapshot = await leaderBoardRef.count().get();
+    return aggregateQuerySnapshot.count ?? 1;
   }
 
   static Future<bool> leaveCommunity(
@@ -260,7 +268,7 @@ class Database {
         .snapshots();
   }
 
-  //show current posf
+  //show current position
   static Stream<QuerySnapshot<LeaderBoardEntry>> loadmyCurrentPos(
       Community community, Tournament tournament) async* {
     final docRef = db
@@ -294,7 +302,46 @@ class Database {
         .snapshots();
   }
 
-static Future<void> changeOnlineStatus(bool isOnline){
-  return db.collection("User").doc(Authentication.getUser()).update({"isOnline": isOnline});
-}
+  static Future<void> changeOnlineStatus(bool isOnline) {
+    return db
+        .collection("User")
+        .doc(Authentication.getUser())
+        .update({"isOnline": isOnline});
+  }
+
+  static Future<List<LeaderBoardEntry>> getPreviewLeaderboard(
+      String communityId, String tournamentId) async {
+    const String apiUrl =
+        "https://getleaderboardpreview-csjycr6t2q-ey.a.run.app";
+    // Define the request body
+    Map<String, dynamic> requestBody = {
+      "communityId": communityId,
+      "loggedInUserId": Authentication.getUser(),
+      "tournamentId": tournamentId,
+    };
+    // Make the HTTP POST request
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: jsonEncode(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+    // Check if the request was successful
+    if (response.statusCode == 200) {
+      // Parse the response body
+      List<dynamic> data = jsonDecode(response.body);
+
+      // Convert the response data to the desired format (List<Map<String, dynamic>>)
+      List<LeaderBoardEntry> leaderboardEntries = [];
+      data.forEach((entry) {
+        leaderboardEntries.add(LeaderBoardEntry(rang: entry["rang"], score: entry["score"], scoreTemp: entry["scoreTemp"], userId: entry["userId"], username: entry["username"], registrationDate: entry["registrationDate"]));
+      });
+
+      return leaderboardEntries;
+    } else {
+      // If the request was not successful, throw an exception or handle the error accordingly
+      throw Exception('Failed to load leaderboard preview');
+    }
+  }
 }

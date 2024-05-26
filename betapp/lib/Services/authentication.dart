@@ -1,13 +1,14 @@
-import 'package:betapp/Models/User.dart' as model;
+import 'package:betapp/Models/user.dart' as model;
 import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Services/database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/rendering.dart';
 
 class Authentication{
 
   static final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  static final FirebaseFirestore db = FirebaseFirestore.instance;
   
 
    Future<User?> signInAnon(String username) async {
@@ -27,11 +28,16 @@ class Authentication{
       for(DocumentSnapshot<Tournament> document in snapshot.docs){
         await Database.joinCommunity("global", document.data()!);
       }
-      
       return user;
     } catch (e) {
       return null;
     }
+  }
+
+  static Future<Timestamp> getRegistrationDate()async{
+    DocumentSnapshot documentSnapshot = await db.collection("User").doc(getUser()).get();
+    return (documentSnapshot.data() as Map<String, dynamic>)["registrationDate"];
+  
   }
 
   static String getUser(){

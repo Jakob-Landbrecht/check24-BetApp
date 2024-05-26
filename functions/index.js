@@ -601,16 +601,16 @@ exports.cleanScores = onSchedule("every 6 hours", async (event) => {
 exports.updateValue = onRequest(async (req, res) => {
   try {
     // Extract the 'score' and 'isHomeTeam' parameters from the URL
-    const score = req.query.score;
+    const scoreParam = req.query.score;
     const isHomeTeamParam = req.query.isHomeTeam;
     const tournamentId = req.query.tournamentId;
 
-    if (!score || isHomeTeamParam || tournamentId === undefined) {
-      res.status(400).send("Missing 'number', 'isHomeTeam', 'tournamentId' parameter");
-      return;
-    }
+    if (!scoreParam || isHomeTeamParam === undefined || !tournamentId) {
+        res.status(400).send("Missing 'score', 'isHomeTeam', or 'tournamentId' parameter");
+        return;
+      }
 
-    const numberValue = parseInt(score, 10);
+    const numberValue = parseInt(scoreParam, 10);
     const isHomeTeamValue = isHomeTeamParam === "true";
 
     if (isNaN(numberValue)) {
@@ -642,3 +642,110 @@ exports.updateValue = onRequest(async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+exports.getLeaderboardPreview = onRequest({region: "europe-west3"}, async (req, res) => {
+    // Ensure the request is a POST request
+    if (req.method !== "POST") {
+        res.status(405).send("Method Not Allowed");
+        return;
+    }
+
+
+    // Parse the JSON body
+    let communityId;
+    let loggedInUserId;
+    let tournamentId;
+    try {
+        const body = JSON.parse(req.body);
+        communityId = body.communityId;
+        loggedInUserId = body.loggedInUserId;
+        tournamentId = body.tournamentId;
+    } catch (error) {
+        res.status(400).send("Invalid JSON body");
+        return;
+    }
+
+    if (!communityId || !loggedInUserId || !tournamentId) {
+        res.status(400).send("Missing parameters");
+        return;
+    }
+
+    try {
+      const leaderboardRef = admin.firestore()
+        .collection("Tournaments").doc(tournamentId)
+        .collection("Communities").doc(communityId)
+        .collection("Leaderboard");
+
+      // Check the number of documents in the collection
+    const countSnapshot = await leaderboardRef.count().get();
+    const totalCount = countSnapshot.data().count;
+      if (totalCount < 7) {
+        const allSnapshot = await leaderboardRef.orderBy("rang").orderBy("registrationDate").get();
+        const allEntries = allSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+        res.status(200).send(allEntries);
+        return;
+      }
+
+      // Fetch top 3 users
+      const top3Snapshot = await leaderboardRef.orderBy("rang").orderBy("registrationDate").limit(3).get();
+      const top3Users = top3Snapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}));
+
+      const previewEntries = [...top3Users];
+
+      // Fetch logged-in user
+      const currentUserSnapshot = await leaderboardRef.where("userId", "==", loggedInUserId).limit(1).get();
+      if (currentUserSnapshot.empty) {
+        res.status(404).send("Logged-in user not found in leaderboard");
+        return;
+      }
+      const currentUser = currentUserSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))[0];
+
+      // Fetch user below the logged-in user
+      const belowUserSnapshot = await leaderboardRef
+        .orderBy("rang")
+        .startAfter(currentUser.rang)
+        .limit(1)
+        .get();
+      const belowUser = belowUserSnapshot.empty ? null : belowUserSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))[0];
+
+      // Fetch user above the logged-in user
+      const aboveUserSnapshot = await leaderboardRef
+        .orderBy("rang")
+        .endBefore(currentUser.rang)
+        .limitToLast(1)
+        .get();
+      const aboveUser = aboveUserSnapshot.empty ? null : aboveUserSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))[0];
+
+      if (aboveUser) previewEntries.push(aboveUser);
+      previewEntries.push(currentUser);
+      if (belowUser) previewEntries.push(belowUser);
+
+      // Add last user
+      const lastUserSnapshot = await leaderboardRef.orderBy("rang", "desc").limit(1).get();
+      const lastUser = lastUserSnapshot.docs.map((doc) => ({id: doc.id, ...doc.data()}))[0];
+      if (!previewEntries.some((entry) => entry.userId === lastUser.userId)) {
+        previewEntries.push(lastUser);
+      }
+
+      // Remove duplicates and ensure exactly 7 entries
+      const uniquePreviewEntries = Array.from(new Set(previewEntries.map((entry) => entry.userId)))
+        .map((userId) => previewEntries.find((entry) => entry.userId === userId));
+
+       // If there are less than 7 unique users, add more from the leaderboard
+    const additionalUsersSnapshot = await leaderboardRef.orderBy("rang").orderBy("registrationDate").get();
+    let i = 0;
+    while (uniquePreviewEntries.length < 7 && i < additionalUsersSnapshot.size) {
+      const entry = additionalUsersSnapshot.docs[i].data();
+      if (!uniquePreviewEntries.some((e) => e.userId === entry.userId)) {
+        uniquePreviewEntries.push({id: additionalUsersSnapshot.docs[i].id, ...entry});
+      }
+      i++;
+    }
+
+      res.status(200).send(uniquePreviewEntries.slice(0, 7));
+    } catch (error) {
+      console.error("Error fetching leaderboard preview:", error);
+      res.status(500).send("Internal server error");
+    }
+  });

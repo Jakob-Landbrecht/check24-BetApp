@@ -6,6 +6,7 @@ class LeaderBoardEntry {
   final int scoreTemp;
   final String userId;
   final String username;
+  final Timestamp registrationDate;
   String? id;
 
   LeaderBoardEntry({
@@ -13,6 +14,7 @@ class LeaderBoardEntry {
     required this.score,
     required this.scoreTemp,
     required this.userId,
+    required this.registrationDate,
     required this.username
   });
 
@@ -22,6 +24,18 @@ class LeaderBoardEntry {
 
   String getUid() {
     return id!;
+  }
+
+  factory LeaderBoardEntry.fromJson(Map<String, dynamic> json) {
+    return LeaderBoardEntry(
+      
+      rang: json['rang'] ?? 0,
+      userId: json['userId'] ?? '',
+      username: json['username'] ?? '',
+      score: json['score'] ?? 0,
+      scoreTemp: json['scoreTemp'] ?? 0,
+      registrationDate: json['registrationDate'],
+    );
   }
 
 
@@ -35,7 +49,8 @@ class LeaderBoardEntry {
       score: data?["score"],
       username: data?["username"],
       userId: data?["userId"],
-      scoreTemp: data?["scoreTemp"]
+      scoreTemp: data?["scoreTemp"],
+      registrationDate: data?["registrationDate"]
     );
   }
 
@@ -45,7 +60,8 @@ class LeaderBoardEntry {
       "score": score,
       "username": username,
       "userId": userId,
-      "scoreTemp": scoreTemp
+      "scoreTemp": scoreTemp,
+      "registrationDate": registrationDate
     };
   }
 }

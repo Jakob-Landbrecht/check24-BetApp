@@ -5,6 +5,7 @@ class User{
   final bool isOnline;
   final int score;
   final int midnightScore; 
+  Timestamp? registrationDate;
   final List<String>? communities;
 
   User({
@@ -12,6 +13,7 @@ class User{
     required this.isOnline,
     required this.score,
     required this.midnightScore,
+    this.registrationDate,
     this.communities,
   });
 
@@ -21,6 +23,7 @@ class User{
   ) {
     final data = snapshot.data();
     return User(
+      registrationDate: data?['registrationDate'],
       username: data?['username'],
       isOnline: data?['isOnline'],
       score: data?['score'],
@@ -32,6 +35,7 @@ class User{
 
   Map<String, dynamic> toFirestore() {
     return {
+      "registrationDate": FieldValue.serverTimestamp(),
       "username": username,
       "isOnline": isOnline,
       "score": score,
