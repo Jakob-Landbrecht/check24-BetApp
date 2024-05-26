@@ -201,7 +201,10 @@ class _PaginatedListViewState extends State<PaginatedListView> {
               ),
             );
           }
-          return ListView(
+          if(snapshot.data == null){
+            return const Center(child: Text("No Entry",));
+
+          }else{ return ListView(
             padding: EdgeInsets.zero,
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
@@ -219,7 +222,8 @@ class _PaginatedListViewState extends State<PaginatedListView> {
                 })
                 .toList()
                 .cast(),
-          );
+          );}
+           
         }));
   }
 }

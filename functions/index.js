@@ -14,6 +14,7 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const {functions} = require("firebase-functions/v2");
 const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {faker} = require("@faker-js/faker");
 // The Firebase Admin SDK to access Firestore.
 const admin = require("firebase-admin");
 const iso6391 = require("iso-639-1");
@@ -750,7 +751,7 @@ exports.getLeaderboardPreview = onRequest({region: "europe-west3", cors: false},
     }
   });
 
-  exports.isOnlineSynchronizer = onDocumentUpdated(
+exports.isOnlineSynchronizer = onDocumentUpdated(
     {document: "User/{userId}", region: "europe-west3"},
     async (event) => {
         console.log("isOnlineSynchronizer was called");
@@ -778,3 +779,76 @@ exports.getLeaderboardPreview = onRequest({region: "europe-west3", cors: false},
            });
         });
     });
+
+exports.createFakeUsers = onRequest({region: "europe-west3", cors: true}, async (req, res) => {
+    try {
+        const amount = req.query.amount;
+        if (!amount || amount == 0) {
+            res.status(400).send("Missing 'amount' parameter");
+            return;
+        }
+        if (amount > 100) {
+            res.status(400).send("You can only create a maximum of 100 players at a time");
+            return;
+        }
+        const db = admin.firestore();
+        const batch = db.batch();
+
+        for (let i = 1; i <= amount; i++) {
+            const userId = faker.string.alphanumeric(28);
+            const isOnline = faker.datatype.boolean();
+            const registrationDate = faker.date.recent();
+            const username = faker.internet.userName();
+
+            const docRef = db.collection("User").doc(userId);
+            batch.set(docRef, {
+                "username": username,
+                "score": 0,
+                "midnightScore": 0,
+                "isOnline": isOnline,
+                "registrationDate": registrationDate,
+                "Communities:zXbeHbpMG4a5DPb8jgwT": ["global"],
+            });
+            const leaderBoardRef = db
+            .collection("Tournaments")
+            .doc("zXbeHbpMG4a5DPb8jgwT")
+            .collection("Communities")
+            .doc("global")
+            .collection("Leaderboard");
+
+            const snapshot = await leaderBoardRef.count().get();
+            const number = snapshot.data().count;
+
+
+            batch.set(leaderBoardRef.doc(), {
+                "username": username,
+                "score": 0,
+                "scoreTemp": 0,
+                "isOnline": isOnline,
+                "registrationDate": registrationDate,
+                "userId": userId,
+                "rang": number+i,
+            });
+
+            const gameRef = db.collection("Tournaments").doc("zXbeHbpMG4a5DPb8jgwT").collection("Games");
+            const games = await gameRef.get();
+            games.forEach(async (doc) => {
+                const gameId = doc.id;
+                const betRef = db.collection("Tournaments").doc("zXbeHbpMG4a5DPb8jgwT").collection("Bets").doc();
+                batch.set(betRef, {
+                    "awayTeamCount": faker.number.int(10),
+                    "homeTeamCount": faker.number.int(10),
+                    "gameUid": gameId,
+                    "userUid": userId,
+                });
+            });
+        }
+        await batch.commit();
+
+
+        return res.status(200).send("Fakse users safed to database");
+    } catch (error) {
+        console.error("Error updating Firestore document:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});

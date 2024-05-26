@@ -228,12 +228,13 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
         .collection("Communities")
         .doc(community.getUid())
         .collection("Leaderboard")
+        .where("isOnline", isEqualTo: true)
         .withConverter(
             fromFirestore: LeaderBoardEntry.fromFirestore,
             toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
                 leaderboardEntry.toFirestore())
+      
         .orderBy("rang")
-        .where("isOnline",isEqualTo: true)
         .limit(20)
         .snapshots();
   }
