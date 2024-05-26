@@ -749,3 +749,32 @@ exports.getLeaderboardPreview = onRequest({region: "europe-west3", cors: false},
       res.status(500).send("Internal server error");
     }
   });
+
+  exports.isOnlineSynchronizer = onDocumentUpdated(
+    {document: "User/{userId}", region: "europe-west3"},
+    async (event) => {
+        console.log("isOnlineSynchronizer was called");
+        const afterData = event.data.after.data();
+        const userId = event.params.userId;
+
+        if (!afterData) {
+            console.log("No data associated with the event");
+            return;
+        }
+        const isOnline = afterData.isOnline;
+        const tournaments = await admin.firestore().collection("Tournaments").get();
+
+        tournaments.forEach(async (doc) => {
+           const userCommunities = afterData["Communities:"+doc.id];
+           userCommunities.forEach(async (communityId) => {
+            const docRef = await admin.firestore().collection("Tournaments").doc(doc.id).collection("Communities").doc(communityId).collection("Leaderboard");
+              // Perform the query to get the documents you want to update
+            const querySnapshot = await docRef.where("userId", "==", userId).get();
+
+            // Iterate through each document and update it
+            const updatePromises = querySnapshot.docs.map((doc) => doc.ref.update({"isOnline": isOnline}));
+            await Promise.all(updatePromises);
+            console.log("Documents updated successfully.");
+           });
+        });
+    });

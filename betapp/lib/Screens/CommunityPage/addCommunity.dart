@@ -122,7 +122,7 @@ class _JoinCommunityState extends State<JoinCommunity> {
                       context, 'The Id did not match any community');
                   return;
                 }
-                bool canJoinCommunity = await Database.canJoinCommunity(tournament!.getUID());
+                bool canJoinCommunity = await Database.canJoinCommunity(tournament.getUID());
                 if(!canJoinCommunity){
                    _showAlertDialog(
                       context, 'You can only join a maximum of 5 groups');
@@ -210,7 +210,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
                   return;
                 }
                 Community temp = await Database.createCommunity(
-                    _textController.text, tournament!);
+                    _textController.text, tournament);
                 await Database.joinCommunity(temp.communityUid!,tournament);
                 setState(() {
                   community = temp;

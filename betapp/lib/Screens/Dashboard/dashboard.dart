@@ -1,4 +1,3 @@
-import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/preview.dart';
 import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Screens/Dashboard/communityPreviews.dart';

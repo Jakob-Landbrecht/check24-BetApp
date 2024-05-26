@@ -219,6 +219,25 @@ class Database {
         .snapshots();
   }
 
+//Show online
+static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
+      Community community, Tournament tournament) {
+    return db
+        .collection("Tournaments")
+        .doc(tournament.getUID())
+        .collection("Communities")
+        .doc(community.getUid())
+        .collection("Leaderboard")
+        .withConverter(
+            fromFirestore: LeaderBoardEntry.fromFirestore,
+            toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
+                leaderboardEntry.toFirestore())
+        .orderBy("rang")
+        .where("isOnline",isEqualTo: true)
+        .limit(20)
+        .snapshots();
+  }
+
 //show last
   static Stream<QuerySnapshot<LeaderBoardEntry>> loadLastplace(
       Community community, Tournament tournament) {

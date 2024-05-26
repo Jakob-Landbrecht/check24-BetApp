@@ -62,6 +62,15 @@ class _CommunityPageState extends State<CommunityPage> {
                             context: context,
                             items: [
                               PullDownMenuItem(
+                                title: "All",
+                                icon: CupertinoIcons.wifi,
+                                onTap: () {
+                                  setState(() {
+                                    selection = 8;
+                                  });
+                                },
+                              ),
+                              PullDownMenuItem(
                                 title: "Top 3",
                                 icon: CupertinoIcons.rosette,
                                 onTap: () {
@@ -165,9 +174,9 @@ class _PaginatedListViewState extends State<PaginatedListView> {
 
     switch(widget.selection){
       case 1: {leaderboardStream = Database.loadTop3(widget.community, widget.tournament); break;}
-      case 2: {leaderboardStream = Database.loadCommunityLeaderboard(widget.community, widget.tournament); break;}
+      case 2: {leaderboardStream = Database.loadOnline(widget.community, widget.tournament); break;}
       case 3: {leaderboardStream = Database.loadLastplace(widget.community, widget.tournament); break;}
-      case 4: {leaderboardStream = Database.loadPinned(widget.community, widget.tournament);}
+      case 4: {leaderboardStream = Database.loadPinned(widget.community, widget.tournament); break;}
       case 5: {
         if(widget.searchInput == ""){
           leaderboardStream = Database.loadCommunityLeaderboard(widget.community, widget.tournament);
@@ -176,6 +185,7 @@ class _PaginatedListViewState extends State<PaginatedListView> {
         }
         break;}
       case 6: {leaderboardStream = Database.loadmyCurrentPos(widget.community, widget.tournament); break;}
+      case 8: {leaderboardStream = Database.loadCommunityLeaderboard(widget.community, widget.tournament); break;}
       
     }
    
