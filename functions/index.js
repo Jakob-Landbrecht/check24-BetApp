@@ -780,7 +780,7 @@ exports.isOnlineSynchronizer = onDocumentUpdated(
         });
     });
 
-exports.createFakeUsers = onRequest({region: "europe-west3", cors: true}, async (req, res) => {
+exports.createFakeUsers = onRequest({region: "europe-west3"}, async (req, res) => {
     try {
         const amount = req.query.amount;
         if (!amount || amount == 0) {
