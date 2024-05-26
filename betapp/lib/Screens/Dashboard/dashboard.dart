@@ -83,7 +83,7 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
               child: FutureBuilder(
                   future: previewFuture,
                   builder: ((context, snapshot) {
@@ -110,16 +110,6 @@ class _DashboardState extends State<Dashboard> {
             )
           ]),
         ),
-        SliverToBoxAdapter(
-            child: CupertinoButton(
-                child: const Text("CommunityTest"),
-                onPressed: () {
-                  Navigator.pushNamed(context, "/communityPage", arguments: {
-                    "tournament": tournament,
-                    "community": Community(
-                        name: "Test-5", communityUid: "G0G829AxzCwFmWftGEhw")
-                  });
-                })),
         const SliverFillRemaining(),
         SliverToBoxAdapter(
             child: CupertinoButton(

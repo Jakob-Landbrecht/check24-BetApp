@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:betapp/Models/community.dart';
 import 'package:betapp/Models/tournaments.dart';
 import 'package:betapp/Services/database.dart';
@@ -120,6 +122,12 @@ class _JoinCommunityState extends State<JoinCommunity> {
                       context, 'The Id did not match any community');
                   return;
                 }
+                bool canJoinCommunity = await Database.canJoinCommunity(tournament!.getUID());
+                if(!canJoinCommunity){
+                   _showAlertDialog(
+                      context, 'You can only join a maximum of 5 groups');
+                  return;
+                }
                 await Database.joinCommunity(_textController.text.trim(),tournament);
                 Navigator.pop(context);
                 
@@ -195,7 +203,12 @@ class _CreateCommunityState extends State<CreateCommunity> {
                       context, 'Please enter a name for your Community');
                   return;
                 }
-
+                bool canJoinCommunity = await Database.canJoinCommunity(tournament!.getUID());
+                if(!canJoinCommunity){
+                   _showAlertDialog(
+                      context, 'You can only join a maximum of 5 groups');
+                  return;
+                }
                 Community temp = await Database.createCommunity(
                     _textController.text, tournament!);
                 await Database.joinCommunity(temp.communityUid!,tournament);

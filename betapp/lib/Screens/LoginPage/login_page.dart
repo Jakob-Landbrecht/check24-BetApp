@@ -55,7 +55,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
               CupertinoButton.filled(
-                child: const Text('register'),
+                child: const Text('Register'),
                 onPressed: () async {
                   if(_usernameController.text.trim().isEmpty){
                     _showAlertDialog(context, 'Please enter a Username');

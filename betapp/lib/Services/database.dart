@@ -137,9 +137,17 @@ class Database {
         score: 0,
         scoreTemp: 0,
         userId: Authentication.getUser(),
+        isOnline: true,
         registrationDate: await Authentication.getRegistrationDate(),
         username: user.username));
     return true;
+  }
+
+
+  static Future<bool> canJoinCommunity(String tournamentId)async{
+    DocumentSnapshot documentSnapshot = await db.collection("User").doc(Authentication.getUser()).get();
+    List<dynamic> list = (documentSnapshot.data() as Map<String,dynamic>)["Communities:$tournamentId"];
+    return !(list.length > 5);
   }
 
   static Future<int> getInitialRang(CollectionReference leaderBoardRef) async {
@@ -368,6 +376,7 @@ class Database {
                 score: entry["score"],
                 scoreTemp: entry["scoreTemp"],
                 userId: entry["userId"],
+                isOnline: entry["isOnline"],
                 username: entry["username"],
                 registrationDate: Timestamp(entry["registrationDate"]["_seconds"],entry["registrationDate"]["_nanoseconds"])));
           });

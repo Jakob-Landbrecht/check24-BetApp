@@ -5,6 +5,7 @@ class LeaderBoardEntry {
   final int score;
   final int scoreTemp;
   final String userId;
+  final bool isOnline;
   final String username;
   final Timestamp registrationDate;
   String? id;
@@ -15,7 +16,8 @@ class LeaderBoardEntry {
     required this.scoreTemp,
     required this.userId,
     required this.registrationDate,
-    required this.username
+    required this.username,
+    required this.isOnline
   });
 
   void setUid(String uid) {
@@ -28,7 +30,7 @@ class LeaderBoardEntry {
 
   factory LeaderBoardEntry.fromJson(Map<String, dynamic> json) {
     return LeaderBoardEntry(
-      
+      isOnline: json['isOnline'] ?? false,
       rang: json['rang'] ?? 0,
       userId: json['userId'] ?? '',
       username: json['username'] ?? '',
@@ -46,6 +48,7 @@ class LeaderBoardEntry {
     final data = snapshot.data();
     return LeaderBoardEntry(
       rang: data?["rang"],
+      isOnline: data?["isOnline"],
       score: data?["score"],
       username: data?["username"],
       userId: data?["userId"],
@@ -57,6 +60,7 @@ class LeaderBoardEntry {
   Map<String, dynamic> toFirestore() {
     return {
       "rang": rang,
+      "isOnline": isOnline,
       "score": score,
       "username": username,
       "userId": userId,
