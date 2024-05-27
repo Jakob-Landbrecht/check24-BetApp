@@ -461,100 +461,112 @@ exports.importGames = onRequest(async (request, response) => {
 exports.updateScoreRanking = onDocumentUpdated(
     {document: "Tournaments/{tournamentId}/Games/{docId}", region: "europe-west3"},
     async (event) => {
-        console.log("Function was called");
-        const beforeData = event.data.before;
-        const afterData = event.data.after.data();
-        const tournamentId = event.params.tournamentId;
-        const gameId = event.params.docId;
+      console.log("Function was called");
+      const beforeData = event.data.before.data();
+      const afterData = event.data.after.data();
+      const tournamentId = event.params.tournamentId;
+      const gameId = event.params.docId;
 
-        if (!afterData) {
-            console.log("No data associated with the event");
-            return;
-        }
+      if (!afterData) {
+        console.log("No data associated with the event");
+        return;
+      }
 
-        try {
-            const getAllAffectedBets = await admin.firestore().collection("Tournaments").doc(tournamentId).collection("Bets").where("gameUid", "==", gameId).get();
+      try {
+        const betsSnapshot = await admin.firestore()
+          .collection("Tournaments").doc(tournamentId)
+          .collection("Bets").where("gameUid", "==", gameId).get();
 
-            const updatePromises = [];
-        getAllAffectedBets.forEach(async (doc) => {
-            const awayTeamCount = doc.data().awayTeamCount;
-            const homeTeamCount = doc.data().homeTeamCount;
-            const userUid = doc.data().userUid;
-
-            console.log(userUid);
-            const userDoc = await admin.firestore().collection("User").doc(userUid).get();
-            console.log(userDoc.data());
-            const communitiesOfUser = userDoc.data()["Communities:"+tournamentId];
-            for (const community of communitiesOfUser) {
-                const ref = admin.firestore().collection("Tournaments").doc(tournamentId).collection("Communities").doc(community).collection("Leaderboard").where("userId", "==", userUid);
-                const leaderboardEntry = (await ref.get());
-
-
-                console.log(afterData.AwayTeamScore);
-                console.log(afterData.HomeTeamScore);
-                let points = 0;
-                // Betting Algo
-                if (awayTeamCount == afterData.AwayTeamScore && homeTeamCount == afterData.HomeTeamScore) {
-                    points = 8;
-                } else if (((afterData.HomeTeamScore - afterData.AwayTeamScore) == (homeTeamCount - awayTeamCount)) && homeTeamCount != awayTeamCount) {
-                    points = 6;
-                } else if ((homeTeamCount >= awayTeamCount) && (afterData.HomeTeamScore >= afterData.AwayTeamScore)) {
-                    points = 4;
-                } else if ((awayTeamCount >= homeTeamCount) && (afterData.AwayTeamScore >= afterData.HomeTeamScore)) {
-                    points = 4;
-                } else {
-                    points = 0;
-                }
-
-                console.log("Adding Score Points: "+ points);
-
-                // Assuming leaderboardEntry contains one document per user
-                if (!leaderboardEntry.empty) {
-                    leaderboardEntry.forEach((entryDoc) => {
-                        const leaderboardRef = entryDoc.ref;
-                        updatePromises.push(leaderboardRef.update({scoreTemp: points}));
-                    });
-                }
-            }
-        });
-         // Wait for all updates to complete before proceeding
-         await Promise.all(updatePromises);
-        // Update the Ranks
-        await updateRanks(tournamentId);
-        } catch (error) {
-            console.error("Error in updateScoreRanking function:", error);
-            throw new Error("Failed to update score ranking");
-        }
-    });
-
-async function updateRanks(tournamentId) {
-    try {
-        const communitiesSnapshot = await admin.firestore().collection("Tournaments").doc(tournamentId).collection("Communities").get();
         const updatePromises = [];
+        for (const doc of betsSnapshot.docs) {
+          const betData = doc.data();
+          const awayTeamCount = betData.awayTeamCount;
+          const homeTeamCount = betData.homeTeamCount;
+          const userUid = betData.userUid;
 
-        communitiesSnapshot.forEach(async (communityDoc) => {
-            const communityId = communityDoc.id;
-            const leaderboardRef = admin.firestore().collection("Tournaments").doc(tournamentId).collection("Communities").doc(communityId).collection("Leaderboard");
-            const leaderboardSnapshot = await leaderboardRef.get();
+          console.log(userUid);
+          const userDoc = await admin.firestore().collection("User").doc(userUid).get();
+          const userData = userDoc.data();
+          if (!userData) continue;
+          const communitiesOfUser = userData[`Communities:${tournamentId}`];
+          for (const community of communitiesOfUser) {
+            const ref = admin.firestore()
+              .collection("Tournaments").doc(tournamentId)
+              .collection("Communities").doc(community)
+              .collection("Leaderboard").where("userId", "==", userUid);
+            const leaderboardEntry = await ref.get();
 
-            const leaderboardEntries = [];
-            leaderboardSnapshot.forEach((doc) => {
-                const data = doc.data();
-                const combinedScore = data.score + data.scoreTemp;
-                leaderboardEntries.push({id: doc.id, combinedScore});
-            });
-            leaderboardEntries.sort((a, b) => b.combinedScore - a.combinedScore);
-
-            for (let i = 0; i < leaderboardEntries.length; i++) {
-                const entry = leaderboardEntries[i];
-                updatePromises.push(leaderboardRef.doc(entry.id).update({rang: i + 1}));
+            let points = 0;
+            if (awayTeamCount == afterData.AwayTeamScore && homeTeamCount == afterData.HomeTeamScore) {
+              points = 8;
+            } else if (((afterData.HomeTeamScore - afterData.AwayTeamScore) == (homeTeamCount - awayTeamCount)) && homeTeamCount != awayTeamCount) {
+              points = 6;
+            } else if ((homeTeamCount >= awayTeamCount) && (afterData.HomeTeamScore >= afterData.AwayTeamScore)) {
+              points = 4;
+            } else if ((awayTeamCount >= homeTeamCount) && (afterData.AwayTeamScore >= afterData.HomeTeamScore)) {
+              points = 4;
+            } else {
+              points = 0;
             }
-        });
+
+            console.log("Adding Score Points: " + points);
+
+            if (!leaderboardEntry.empty) {
+              leaderboardEntry.forEach((entryDoc) => {
+                const leaderboardRef = entryDoc.ref;
+                updatePromises.push(leaderboardRef.update({scoreTemp: points}));
+              });
+            }
+          }
+        }
+
         await Promise.all(updatePromises);
-    } catch (error) {
-        console.error("Error while updating rank");
+
+        await updateRanks(tournamentId);
+      } catch (error) {
+        console.error("Error in updateScoreRanking function:", error);
+        throw new Error("Failed to update score ranking");
+      }
     }
-}
+  );
+
+  async function updateRanks(tournamentId) {
+    try {
+      const communitiesSnapshot = await admin.firestore()
+        .collection("Tournaments").doc(tournamentId)
+        .collection("Communities").get();
+
+      const updatePromises = [];
+
+      for (const communityDoc of communitiesSnapshot.docs) {
+        const communityId = communityDoc.id;
+        const leaderboardRef = admin.firestore()
+          .collection("Tournaments").doc(tournamentId)
+          .collection("Communities").doc(communityId)
+          .collection("Leaderboard");
+        const leaderboardSnapshot = await leaderboardRef.get();
+
+        const leaderboardEntries = [];
+        leaderboardSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const combinedScore = data.score + data.scoreTemp;
+          leaderboardEntries.push({id: doc.id, combinedScore});
+        });
+
+        leaderboardEntries.sort((a, b) => b.combinedScore - a.combinedScore);
+
+        for (let i = 0; i < leaderboardEntries.length; i++) {
+          const entry = leaderboardEntries[i];
+          updatePromises.push(leaderboardRef.doc(entry.id).update({rang: i + 1}));
+        }
+      }
+
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error("Error while updating ranks:", error);
+    }
+  }
+
 
 function getFirestoreTimestamp(dateString) {
     const date = new Date(dateString);

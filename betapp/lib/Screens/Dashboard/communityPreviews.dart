@@ -50,6 +50,8 @@ class _CommunityPreviewsState extends State<CommunityPreviews> {
                 ),
               ),
               ListView(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 children: widget.preview.leaderboard.map((leaderboardEntry) {
                   return _ListTile(leaderBoardEntry: leaderboardEntry,);
