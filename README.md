@@ -12,6 +12,8 @@
 - [Demonstration 🏆](#demonstration)
 - [Conclusion](#conclusion)
 
+Eine Video version mit Vorstellung der App kann hier gefunden: [Youtube](https://youtu.be/ciSIEgQ8_Rs)
+
 ## Architectual Design desicions
 Before starting with the development of the application, there are numerous functional as well as non-functional requirements for the planned software. The most important in this case is the real-time capability in combination with handling over 10.000 online users and 2 million active participants. The European championship is a truly global event. Therefore, the frontend should be accessible to as many people as possible.  
 ### Backend
@@ -41,7 +43,7 @@ Note that some of these Gif's show an unfinished state. Watch the video for the 
 ## Understanding the code
 There are two important folders. The first one is [functions](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/functions) which stores all serverless functions deployed to Google. The second one is [lib](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/betapp/lib) which holds all frontend-related files.
 ## Demonstration
-1. **Take a look at this guided demonstration, presenting the iOS version**: [Youtube](amazon.de)  
+1. **Take a look at this guided demonstration, presenting the iOS version**: [Youtube](https://youtu.be/ciSIEgQ8_Rs)  
 2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
    
 You can adjust the score of the upcoming game by invoking this URL:
