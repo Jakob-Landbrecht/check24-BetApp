@@ -143,7 +143,6 @@ class Database {
     return true;
   }
 
-
   static Future<bool> canJoinCommunity(String tournamentId)async{
     DocumentSnapshot documentSnapshot = await db.collection("User").doc(Authentication.getUser()).get();
     List<dynamic> list = (documentSnapshot.data() as Map<String,dynamic>)["Communities:$tournamentId"];
@@ -185,7 +184,7 @@ class Database {
   ///
   ///Getting Realtime Feed///
   static Stream<QuerySnapshot<LeaderBoardEntry>> loadCommunityLeaderboard(
-      Community community, Tournament tournament) {
+      Community community, Tournament tournament, int numberOfRequestedEntries) {
     return db
         .collection("Tournaments")
         .doc(tournament.getUID())
@@ -197,7 +196,7 @@ class Database {
             toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
                 leaderboardEntry.toFirestore())
         .orderBy("rang")
-        .limit(20)
+        .limit(numberOfRequestedEntries)
         .snapshots();
   }
 
@@ -221,7 +220,7 @@ class Database {
 
 //Show online
 static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
-      Community community, Tournament tournament) {
+      Community community, Tournament tournament, int numberOfRequestedEntries) {
     return db
         .collection("Tournaments")
         .doc(tournament.getUID())
@@ -235,7 +234,7 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
                 leaderboardEntry.toFirestore())
       
         .orderBy("rang")
-        .limit(20)
+        .limit(numberOfRequestedEntries)
         .snapshots();
   }
 
@@ -277,7 +276,7 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
 
 //show pinned only
   static Stream<QuerySnapshot<LeaderBoardEntry>> loadPinned(
-      Community community, Tournament tournament) async* {
+      Community community, Tournament tournament, int numberOfRequestedEntries) async* {
     // Obtain shared preferences.
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // Retrieve the pinned users list.
@@ -295,13 +294,20 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
             toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
                 leaderboardEntry.toFirestore())
         .where("userId", whereIn: pinnedUsers.isEmpty ? null : pinnedUsers)
+        .orderBy("rang")
+        .orderBy("registrationDate")
+        .limit(numberOfRequestedEntries)
         .snapshots();
   }
 
   //show current position
   static Stream<QuerySnapshot<LeaderBoardEntry>> loadmyCurrentPos(
-      Community community, Tournament tournament) async* {
-    final docRef = db
+    Community community, Tournament tournament, int numberOfRequestedEntries, int peopleBeforeMyself) async* {
+  final userId = Authentication.getUser();
+
+  // Fetch the document for the current user
+  
+  final docRef = db
         .collection("Tournaments")
         .doc(tournament.getUID())
         .collection("Communities")
@@ -316,21 +322,33 @@ static Stream<QuerySnapshot<LeaderBoardEntry>> loadOnline(
     QuerySnapshot<LeaderBoardEntry> doc = await docRef.get();
     DocumentSnapshot<LeaderBoardEntry> snapshot = doc.docs.first;
 
-    yield* db
-        .collection("Tournaments")
-        .doc(tournament.getUID())
-        .collection("Communities")
-        .doc(community.getUid())
-        .collection("Leaderboard")
-        .withConverter(
-            fromFirestore: LeaderBoardEntry.fromFirestore,
-            toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
-                leaderboardEntry.toFirestore())
-        .orderBy("rang")
-        .startAtDocument(snapshot)
-        .limit(3)
-        .snapshots();
-  }
+  final userEntry = snapshot.data() as LeaderBoardEntry;
+  final userRank = userEntry.rang; // Assuming "rang" is the field representing rank
+
+  // Calculate the range of ranks to fetch including people before and after the current user
+  final startRank = userRank - peopleBeforeMyself;
+  final endRank = userRank + numberOfRequestedEntries - 1; // Adjusting for zero-based index
+
+  // Fetch leaderboard entries in the specified range
+  final querySnapshot = await db
+      .collection("Tournaments")
+      .doc(tournament.getUID())
+      .collection("Communities")
+      .doc(community.getUid())
+      .collection("Leaderboard")
+      .withConverter(
+          fromFirestore: LeaderBoardEntry.fromFirestore,
+          toFirestore: (LeaderBoardEntry leaderboardEntry, options) =>
+              leaderboardEntry.toFirestore())
+      .orderBy("rang")
+      .startAt([startRank]) // Start at the specified rank
+      .endAt([endRank]) // End at the specified rank
+      .get();
+
+  yield querySnapshot; // Yield the query snapshot
+}
+
+
 
   static Future<void> changeOnlineStatus(bool isOnline) {
     return db
