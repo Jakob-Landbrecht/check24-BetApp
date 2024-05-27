@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    //Authentication.signOut();
     WidgetsBinding.instance.addObserver(this);
 
   }

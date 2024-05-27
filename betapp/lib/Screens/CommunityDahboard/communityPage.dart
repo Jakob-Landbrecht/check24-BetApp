@@ -171,6 +171,8 @@ class PaginatedListView extends StatefulWidget {
 
 class _PaginatedListViewState extends State<PaginatedListView> {
   int numberOfRequestedEntries = 10;
+  int upEntries = 4;
+  int downEntries = 6;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +208,7 @@ class _PaginatedListViewState extends State<PaginatedListView> {
         break;
       case 6:
         leaderboardStream = Database.loadmyCurrentPos(
-            widget.community, widget.tournament, 2, 1);
+            widget.community, widget.tournament, downEntries,upEntries);
         break;
       case 8:
         numberOfRequestedEntries = 10;
@@ -238,7 +240,11 @@ class _PaginatedListViewState extends State<PaginatedListView> {
                                 .rang ==
                             1)
                     ? null
-                    : () {},
+                    : () {
+                      setState(() {
+                        upEntries += 10;
+                      });
+                    },
                 child: const Icon(
                   CupertinoIcons.up_arrow,
                   size: 20,
@@ -267,8 +273,11 @@ class _PaginatedListViewState extends State<PaginatedListView> {
                     ? null
                     : () {
                         setState(() {
-                          
-                          numberOfRequestedEntries += 10;
+                          if(widget.selection != 6){
+                            numberOfRequestedEntries += 10;
+                          }else{
+                            downEntries += 5;
+                          }
                         });
                       },
                 child: const Icon(
