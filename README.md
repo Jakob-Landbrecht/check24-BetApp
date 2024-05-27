@@ -28,7 +28,7 @@ The frontend is written in Flutter (or Dart to be precise). This cross-platform 
 Login/Tournament           |  Placing a Bet            |  Add/Join Community      |  Leaderboard             |
 :-------------------------:|:-------------------------:|:-------------------------|:-------------------------|
 <img src="https://github.com/Jakob-Landbrecht/check24-BetApp/assets/44413507/4f7353e5-bcd0-42e3-9a04-a7d8f1cc69b0" alt="drawing" width="220"/> | <img src="https://github.com/Jakob-Landbrecht/check24-BetApp/assets/44413507/08f78751-94f5-4c2a-b540-bff4cb9a3aab" alt="drawing" width="220"/> | <img src="https://github.com/Jakob-Landbrecht/check24-BetApp/assets/44413507/bf81f015-e898-4ec1-b030-892ed130241e" alt="drawing" width="220"/> | <img src="https://github.com/Jakob-Landbrecht/check24-BetApp/assets/44413507/b896ddd8-dbac-4d20-9690-b610dd312a08" alt="drawing" width="220"/>
-
+Note that some of these Gif's show an unfinished state. Watch the video for the final version.
 
 ## Features and Fulfilled Requirements
 1. Authentication: Firebase Authentication is used to authenticate the user. This way other authentication providers such as Google, Apple, or Facebook could be easily added.
