@@ -44,7 +44,7 @@ Note that some of these Gif's show an unfinished state. Watch the video for the 
 There are two important folders. The first one is [functions](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/functions) which stores all serverless functions deployed to Google. The second one is [lib](https://github.com/Jakob-Landbrecht/check24-BetApp/tree/main/betapp/lib) which holds all frontend-related files.
 ## Demonstration
 1. **Take a look at this guided demonstration, presenting the iOS version**: [Youtube](https://youtu.be/ciSIEgQ8_Rs)  
-2. Play around with the web version yourseld: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com)
+2. Play around with the web version: [bet.jakob-landbrecht.com](https://bet.jakob-landbrecht.com) (Be aware that the software was primarly developed for the iOS version. Therefore features like pagination might not work as expected)
    
 You can adjust the score of the upcoming game by invoking this URL:
 ```
